@@ -28,7 +28,7 @@ exports.sendOTP = async (req, res) => {
         console.log("OTP generated", otp);
 
         // check unique otp or not or we can use library which will auto give unique otp everytime
-        const result = await OTP.findOne({ otp: otp });
+        let result = await OTP.findOne({ otp: otp });
 
         while (result) {
             var otp = otpGenerator.generate(6, {
@@ -38,9 +38,25 @@ exports.sendOTP = async (req, res) => {
             });
             result = await OTP.findOne({ otp: otp });
         }
-        
-    } catch (error) {
 
+        const otpPayload = { email, otp };
+        
+        // create an entry in db for OTP
+        const otpBody = await OTP.create(otpPayload);
+        console.log(otpBody);
+
+        res.status(200).json({
+            success: true,
+            message: 'OTP sent successfully',
+            otp,
+        })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        })
     }
 }
 
