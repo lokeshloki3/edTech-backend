@@ -226,11 +226,32 @@ exports.login = async (req, res) => {
 
 // changePassword
 exports.changePassword = async (req, res) => {
-    // get data from req body
+    try {
+        // get data from req body
+    const {oldPassword, newPassword , confirmPassword} = req.body;
     // get oldPassword, newPassword, confirmPassword
+    const password = await User.findOne({email});
     // validation
+    if(!oldPassword || !newPassword || !confirmPassword){
+        return res.status(400).json({
+            success: false,
+            message: "All fields are required",
+        });
+    }
 
     // update password in db
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await User.findOneAndReplace({email: email},{password: hashedPassword},{new:true})
     // send email - Password updated
+    await mailSender(
+        email,
+        "Password Updated successfully",
+        "Password Updated successfully"
+    );
     //  return response
+    } catch (error) {
+        
+    }
 }
