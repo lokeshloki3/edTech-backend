@@ -92,4 +92,34 @@ exports.courseDetails = async (req, res) => {
             error: error.message,
         });
     }
+};
+
+
+// getAllCourses handler function
+
+exports.showAllCourses = async (req, res) => {
+    try {
+        const allCourses = await Course.find(
+            {},
+            {
+                courseName: true,
+                price: true,
+                thumbnail: true,
+                instructor: true,
+                ratingAndReviews: true,
+                studentsEnrolled: true,
+            }).populate("instructor").exec();
+        return res.status(200).json({
+            success: true,
+            message: "Data for courses fetched successfully",
+            data: allCourses,
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch course data",
+            error: error.message,
+        });
+    }
 }
