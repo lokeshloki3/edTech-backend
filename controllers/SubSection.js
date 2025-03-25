@@ -76,7 +76,7 @@ exports.updateSubSection = async (req, res) => {
                 description: description,
                 videoUrl: uploadDetails.secure_url,
             }, { new: true });
-        // delete the entry from course schema ?
+        // delete the entry from section schema ?
         // return response
         return res.status(200).json({
             success: true,
@@ -90,4 +90,27 @@ exports.updateSubSection = async (req, res) => {
         });
     }
 }
+
 // delete sub section
+
+exports.deleteSubSection = async (req, res) => {
+    try {
+        // get ID - assuming we are sending ID in params
+        const { subSectionId } = req.params;
+        // use findIdAndDelete
+        await SubSection.findByIdAndDelete({ subSectionId });
+
+        // delete the entry from section schema ?
+        // return response
+        return res.status(200).json({
+            success: true,
+            message: "Sub Section deleted successfully",
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unable to delete Sub Section, Please try again",
+            error: error.message,
+        });
+    }
+}
