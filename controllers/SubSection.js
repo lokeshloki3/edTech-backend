@@ -51,4 +51,43 @@ exports.createSubSection = async (req, res) => {
 }
 
 // update sub section
+exports.updateSubSection = async (req, res) => {
+    try {
+        // fetch data from req body
+        const { title, timeDuration, description, subSectionId } = req.body;
+        // extract file/video
+        const video = req.files.videoFile;
+        // validation
+        if (!title || !timeDuration || !description || !video || !subSectionId) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required",
+            });
+        }
+
+        // upload video to Cloudinary - got secure url
+        const uploadDetails = await uploadImageToCloudinary(video, process.env.FOLDER_NAME);
+
+        // update data - no need to update section as section only have subsection id
+        const section = await SubSection.findByIdAndUpdate(subSectionId,
+            {
+                title: title,
+                timeDuration: timeDuration,
+                description: description,
+                videoUrl: uploadDetails.secure_url,
+            }, { new: true });
+        // delete the entry from course schema ?
+        // return response
+        return res.status(200).json({
+            success: true,
+            message: "Sub Section updated successfully",
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Unable to update Sub Section, Please try again",
+            error: error.message,
+        });
+    }
+}
 // delete sub section

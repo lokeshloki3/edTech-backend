@@ -54,7 +54,6 @@ exports.updateSection = async (req, res) => {
         }
         // update data - no need to update course as course only have section id
         const section = await Section.findByIdAndUpdate(sectionId, { sectionName }, { new: true });
-        // delete the entry from course schema ?
         // return response
         return res.status(200).json({
             success: true,
@@ -75,6 +74,7 @@ exports.deleteSection = async (req, res) => {
         const { sectionId } = req.params;
         // use findIdAndDelete
         await Section.findByIdAndDelete(sectionId);
+        // delete the entry from course schema ?
         // return response
         return res.status(200).json({
             success: true,
