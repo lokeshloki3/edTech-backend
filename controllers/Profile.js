@@ -34,9 +34,41 @@ exports.updateProfile = async (req, res) => {
     } catch (error) {
         return res.status(500).json({
             success: false,
+            message: "User cannot be updated",
             error: error.message,
         });
     }
 }
 
-// deleteCount
+// deleteAccount
+// Explore -> How can we schedule this deletion operation say after 5 days - crone jobs
+exports.deleteAccount = async (req, res) => {
+    try {
+        // get id - middleware decode
+        const id = req.body.id;
+        // validation
+        const userDetails = await User.findById(id);
+        if (!userDetails) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+        // delete profile
+        await Profile.findByIdAndDelete({ _id: userDetails.additonalDetails });
+        // also do - unenroll user from all the enrolled courses
+        // delete user
+        await User.findByIdAndDelete({ _id: id });
+
+        // return response
+        return res.status(200).json({
+            success: true,
+            message: "User deleted successfully",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "User cannot be deleted",
+        });
+    }
+}  
