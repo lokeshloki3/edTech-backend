@@ -41,7 +41,7 @@ exports.updateProfile = async (req, res) => {
 }
 
 // deleteAccount
-// Explore -> How can we schedule this deletion operation say after 5 days - crone jobs
+// Explore -> How can we schedule this deletion operation say after 5 days - cron jobs
 exports.deleteAccount = async (req, res) => {
     try {
         // get id - middleware decode
@@ -56,7 +56,7 @@ exports.deleteAccount = async (req, res) => {
         }
         // delete profile
         await Profile.findByIdAndDelete({ _id: userDetails.additonalDetails });
-        // also do - unenroll user from all the enrolled courses
+        // also do - unenroll user student from all the enrolled courses - not teacher as course will remain even after teacher leaves
         // delete user
         await User.findByIdAndDelete({ _id: id });
 
@@ -71,4 +71,27 @@ exports.deleteAccount = async (req, res) => {
             message: "User cannot be deleted",
         });
     }
-}  
+}
+
+
+exports.getAllUserDetails = async (req, res) => {
+    try {
+        // get id
+        const id = req.user.id;
+
+        // validation and get user details - User has only Profile id(additionalDetails), to have Profile data need to populate and exec it
+        const userDetails = await User.findById(id).populate("additionalDetails").exec();
+
+        // return response
+        return res.status(200).json({
+            success: true,
+            message: "User data fetched successfully",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "User cannot be fetch",
+            error: error.message,
+        });
+    }
+}
