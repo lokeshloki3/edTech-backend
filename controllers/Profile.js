@@ -44,6 +44,12 @@ exports.updateProfile = async (req, res) => {
 // Explore -> How can we schedule this deletion operation say after 5 days - cron jobs
 exports.deleteAccount = async (req, res) => {
     try {
+        // TODO: Find More on Job Schedule
+        // const job = schedule.scheduleJob("10 * * * * *", function () {
+        // 	console.log("The answer to life, the universe, and everything!");
+        // });
+        // console.log(job);
+
         // get id - middleware decode
         const id = req.body.id;
         // validation
@@ -86,6 +92,7 @@ exports.getAllUserDetails = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "User data fetched successfully",
+            data: userDetails,
         });
     } catch (error) {
         return res.status(500).json({

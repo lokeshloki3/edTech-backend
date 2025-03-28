@@ -1,27 +1,32 @@
 const Course = require("../models/Course");
-const Tag = require("../models/Category");
+const Category = require("../models/Category");
 const User = require("../models/User");
 const { uploadImageToCloudinary } = require("../utils/imageUploader");
 
-exports.courseDetails = async (req, res) => {
+exports.createCourse = async (req, res) => {
     try {
         // fetch data
-        const { courseName, courseDescription, whatYouWillLearn, price, tag } = req.body; // tag is id in course schema
+        const { courseName, courseDescription, whatYouWillLearn, price, tag, category, status, instructions } = req.body; // category is id in course schema
 
-        // get thumbnail
+        // get thumbnail image from request files
         const thumbnail = req.files.thumbnailImage;
 
         // validation
-        if (!courseName || courseDescription || whatYouWillLearn || !price || !tag || !thumbnail) {
+        if (!courseName || !courseDescription || !whatYouWillLearn || !price || !tag || !thumbnail || !category) {
             return res.status(400).json({
                 success: false,
                 message: "All fields are required",
             });
         }
+        if (!status || status === undefined) {
+            status = "Draft";
+        }
 
         // check for instructor by getting object id from db(other method) using user id of intsructor is there in req body used in middleware(other method)
         const userId = req.user.id; // user.decode in user in middleware
-        const instructorDetails = await User.findById(userId);
+        const instructorDetails = await User.findById(userId, {
+            accountType: "Instructor",
+        });
         console.log("Instructor Details: ", instructorDetails);
 
         if (!instructorDetails) {
@@ -31,12 +36,12 @@ exports.courseDetails = async (req, res) => {
             });
         }
 
-        // check given tag is valid or not - get object id of tag , user id of tag in req body
-        const tagDetails = await Tag.findById(tag);
-        if (!tagDetails) {
+        // check given category is valid or not - get object id of category, user id of category in req body
+        const categoryDetails = await Category.findById(category);
+        if (!categoryDetails) {
             return res.status(404).json({
                 success: false,
-                message: "Tag Details not found",
+                message: "Category Details not found",
             });
         }
 
@@ -51,8 +56,11 @@ exports.courseDetails = async (req, res) => {
             instructor: instructorDetails._id,
             whatYouWillLearn,
             price,
-            tag: tagDetails._id, // or req body also have this
+            tag: tag,
+            category: categoryDetails._id, // or req body also have this
             thumbnail: thumbnailImage.secure_url,
+            status: status,
+            instructions: instructions,
         });
 
         // add the new course to the user schema of Instructor
@@ -66,8 +74,8 @@ exports.courseDetails = async (req, res) => {
             { new: true },
         );
 
-        // update the Tag schema also
-        await Tag.findByIdAndUpdate(
+        // update the Category schema also
+        await Category.findByIdAndUpdate(
             { _id: tagDetails._id },
             {
                 $push: {
