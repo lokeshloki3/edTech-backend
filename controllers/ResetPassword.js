@@ -10,16 +10,16 @@ exports.resetPasswordToken = async (req, res) => {
         // check user for this email
         const user = await User.findOne({ email: email });
         // email validation
-        if (!User) {
+        if (!user) {
             return res.status(400).json({
                 success: false,
-                message: "Your email is not registered with us",
+                message: `Your email: ${email} is not registered with us`,
             });
         }
         // generate token
-        const token = crypto.randomUUID();
+        const token = crypto.randomBytes(20).toString("hex");
         // update user by adding token and expiration time
-        const updateDetails = await User.findOneAndUpdate(
+        const updatedDetails = await User.findOneAndUpdate(
             { email: email },
             {
                 token: token,
@@ -27,7 +27,9 @@ exports.resetPasswordToken = async (req, res) => {
             },
             {
                 new: true, // give latest one
-            });
+            }
+        );
+        console.log("Details", updatedDetails);
         // create url
         const url = `http://localhost:3000/update-password/${token}`
         // send mail containing the url
