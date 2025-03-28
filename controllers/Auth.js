@@ -67,7 +67,7 @@ exports.sendOTP = async (req, res) => {
 exports.singUp = async (req, res) => {
 
     try {
-        // data fetch from req body
+        // Destructure fields from req body
         const {
             firstName,
             lastName,
@@ -100,7 +100,7 @@ exports.singUp = async (req, res) => {
         if (existingUser) {
             return res.status(400).json({
                 success: false,
-                message: "User is already registered"
+                message: "User is already registered. Please sign in to continue."
             });
         }
 
@@ -115,7 +115,7 @@ exports.singUp = async (req, res) => {
                 success: false,
                 message: "OTP not found"
             })
-        } else if (otp !== recentOtp.otp) {
+        } else if (otp !== recentOtp[0].otp) {
             // invalid otp
             return res.status(400).json({
                 success: false,
@@ -127,6 +127,12 @@ exports.singUp = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // entry create in db
+
+        // Create the user
+        let approved = "";
+        approved === "Instructor" ? (approved = false) : (approved = true);
+
+        // Create additional profile for user
         const profileDetails = await Profile.create({
             gender: null,
             dateOfBirth: null,
@@ -141,6 +147,7 @@ exports.singUp = async (req, res) => {
             contactNumber,
             password: hashedPassword,
             accountType,
+            approved: approved,
             additionalDetails: profileDetails._id,
             image: `http://api.dicebear.com/5.x/initials/svg?seed=${firstName} ${lastName}`, // dice bear api
         })
@@ -228,30 +235,30 @@ exports.login = async (req, res) => {
 exports.changePassword = async (req, res) => {
     try {
         // get data from req body
-    const {oldPassword, newPassword , confirmPassword} = req.body;
-    // get oldPassword, newPassword, confirmPassword
-    const password = await User.findOne({email});
-    // validation
-    if(!oldPassword || !newPassword || !confirmPassword){
-        return res.status(400).json({
-            success: false,
-            message: "All fields are required",
-        });
-    }
+        const { oldPassword, newPassword, confirmPassword } = req.body;
+        // get oldPassword, newPassword, confirmPassword
+        const password = await User.findOne({ email });
+        // validation
+        if (!oldPassword || !newPassword || !confirmPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required",
+            });
+        }
 
-    // update password in db
+        // update password in db
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-    await User.findOneAndReplace({email: email},{password: hashedPassword},{new:true})
-    // send email - Password updated
-    await mailSender(
-        email,
-        "Password Updated successfully",
-        "Password Updated successfully"
-    );
-    //  return response
+        await User.findOneAndReplace({ email: email }, { password: hashedPassword }, { new: true })
+        // send email - Password updated
+        await mailSender(
+            email,
+            "Password Updated successfully",
+            "Password Updated successfully"
+        );
+        //  return response
     } catch (error) {
-        
+
     }
 }
