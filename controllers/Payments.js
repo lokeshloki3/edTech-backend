@@ -76,7 +76,81 @@ exports.capturePayment = async (req, res) => {
         return res.status(500).json({
             success: false,
             error: error.message,
-        });dfdfsdf
+        });
     }
 };
 
+// verify Signature of Razorpay and our backend server
+
+exports.verifySignature = async (req, res) => {
+    const webhookSecret = "12345678"; // my secret which I have given to Razorpay
+
+    // razorpay hit my backend webhook api and send my secret back to me after successful payment in req - one way encryption
+    const signature = req.header["x-razorpay-signature"];
+
+    // as razorpay secret is one way encrypted - we encrypt our secret and verify it with razorpay secret
+    const shasum = crypto.createHmac("sha256", webhookSecret);
+    shasum.update(JSON.stringify(req.body));
+    const digest = shasum.digest("hex");
+
+    if (signature === digest) {
+        console.log("Payment is Authorised");
+
+        // we have sent it in notes to update it here
+        const { courseId, userId } = req.body.payload.payment.entity.notes;
+
+        try {
+            // fulfil the action
+
+            // find the course and enroll the student in it
+            const enrolledCourse = await Course.findByIdAndUpdate(
+                { _id: courseId },
+                { $push: { studentsEnrolled: userId } },
+                { new: true },
+            );
+
+            if (!enrolledCourse) {
+                return res.status(500).json({
+                    success: false,
+                    message: 'Course not Found',
+                });
+            }
+
+            console.log(enrolledCourse);
+
+            // find the student and add the course to their list enrolled courses
+            const enrolledStudent = await User.findByIdAndUpdate(
+                { _id: userId },
+                { $push: { courses: courseId } },
+                { new: true },
+            );
+            console.log(enrolledStudent);
+
+            // send confirmation mail - will change mailSender util later for html email template
+            const emailResponse = await mailSender(
+                enrolledStudent.email,
+                "Congratulations from edTech",
+                "Congratulations, you are onboarded into new edTech Course",
+            );
+
+            console.log(emailResponse);
+            return res.status(200).json({
+                success: true,
+                message: "Signature Verified and Course Added",
+            });
+        }
+        catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                success: false,
+                message: error.message,
+            });
+        }
+    }
+    else {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid request',
+        });
+    }
+};
