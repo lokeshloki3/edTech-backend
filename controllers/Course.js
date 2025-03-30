@@ -150,7 +150,7 @@ exports.getCourseDetails = async (req, res) => {
                 }
             )
             .populate("category")
-            .populate("ratingAndreviews")
+            .populate("ratingAndReviews")
             .populate(
                 {
                     path: "courseContent", // courseContent is Section and subSection Id is there in Section
