@@ -51,17 +51,19 @@ exports.showAllCategories = async (req, res) => {
     }
 }
 
+// categoryPageDetails
 
 exports.categoryPageDetails = async (req, res) => {
     try {
+        // get categoryId
         const { categoryId } = req.body;
 
-        // Get courses for the specified category
+        // Get courses for the specified categoryId
         const selectedCategory = await Category.findById(categoryId)
-            .populate("courses")
+            .populate("courses") // Category schema has course array reference so need to populate it
             .exec();
         console.log(selectedCategory);
-        // Handle the case when the category is not found
+        // Validation - when the category is not found
         if (!selectedCategory) {
             console.log("Category not found.");
             return res.status(404).json({
@@ -80,10 +82,10 @@ exports.categoryPageDetails = async (req, res) => {
 
         const selectedCourses = selectedCategory.courses;
 
-        // Get courses for other categories
+        // Get courses for other different categories
         const categoriesExceptSelected = await Category.find({
-            _id: { $ne: categoryId },
-        }).populate("courses");
+            _id: { $ne: categoryId }, //$ne -> not equal
+        }).populate("courses").exec();
         let differentCourses = [];
         for (const category of categoriesExceptSelected) {
             differentCourses.push(...category.courses);
@@ -96,11 +98,21 @@ exports.categoryPageDetails = async (req, res) => {
             .sort((a, b) => b.sold - a.sold)
             .slice(0, 10);
 
-        res.status(200).json({
+        // return response
+        return res.status(200).json({
+            success: true,
             selectedCourses: selectedCourses,
             differentCourses: differentCourses,
             mostSellingCourses: mostSellingCourses,
         });
+        // return res.status(200).json({
+        //     success: true,
+        //     data: {
+        //         selectedCourses: selectedCourses,
+        //         differentCourses: differentCourses,
+        //         mostSellingCourses: mostSellingCourses,
+        //     }
+        // });
     } catch (error) {
         return res.status(500).json({
             success: false,
