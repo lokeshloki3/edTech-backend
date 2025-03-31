@@ -138,7 +138,7 @@ exports.getCourseDetails = async (req, res) => {
         // get id
         const { courseId } = req.body;
 
-        // find complete course details
+        // find complete course details - nested populate
         const courseDetails = await Course.find(
             { _id: courseId })
             .populate(
