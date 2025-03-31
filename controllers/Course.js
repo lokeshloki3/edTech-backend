@@ -45,7 +45,7 @@ exports.createCourse = async (req, res) => {
             });
         }
 
-        // upload Image to Cloudinary
+        // upload Image to Cloudinary - Folder name of cloudinary
         const thumbnailImage = await uploadImageToCloudinary(thumbnail, process.env.FOLDER_NAME);
 
         // create an entry for new Course
