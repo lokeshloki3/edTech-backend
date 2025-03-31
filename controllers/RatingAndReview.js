@@ -1,5 +1,6 @@
 const RatingAndReview = require("../models/RatingAndReview");
 const Course = require("../models/Course");
+const { default: mongoose } = require("mongoose");
 
 // createRating
 exports.createRating = async (req, res) => {
@@ -56,6 +57,66 @@ exports.createRating = async (req, res) => {
             ratingReview,
         });
     } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+}
+
+// getAverageRating
+exports.getAverageRating = async (req, res) => {
+    try {
+        // get course ID
+        const courseId = req.body.courseId;
+        // const { courseId } = req.body;
+
+        // calculate avg rating - aggregate returns array
+        const result = await RatingAndReview.aggregate([
+            {
+                $match: {
+                    course: new mongoose.Types.ObjectId(courseId), // change courseId from string to ObjectId
+                },
+            },
+            {
+                $group: {    // group all above courseId entries
+                    _id: null,  // single group wrap as I do not know how to group them
+                    averageRating: { $avg: "$rating" },
+                }
+            }
+        ])
+
+        // return rating
+        if (result.length > 0) {
+            return res.status(200).json({
+                success: true,
+                averageRating: result[0].averageRating,  // as aggregate return array and its first index has average rating as right now we have only one element in our result array, may be more in future change index accordingly in future
+            })
+        }
+
+        // if no rating/review exist
+        return res.status(200).json({
+            success: true,
+            message: "Average Rating is 0, no ratings given till now",
+            averageRating: 0,
+        })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+}
+
+// getAllRating
+exports.getAllRating = async (req, res) => {
+    try {
+
+    } catch (error) {
+        console.log(error);
         return res.status(500).json({
             success: false,
             message: error.message,
