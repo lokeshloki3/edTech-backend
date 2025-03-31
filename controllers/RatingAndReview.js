@@ -140,4 +140,33 @@ exports.getAllRating = async (req, res) => {
     }
 }
 
-// getAllRatingAndReviews only based on courseId
+// getAllRatingAndReviews only based on courseId - check ?
+exports.getAllRatingForCourse = async (req, res) => {
+    try {
+        // get course ID
+        const { courseId } = req.body;
+        // find acc to courseId, sort decreasing order, userId and courseId in ReviewAndRating schema so populate them
+        const allReviews = await RatingAndReview.find({ _id: courseId })
+            .sort({ rating: "desc" })
+            .populate({
+                path: "user",
+                select: "firstName lastName email image",
+            })
+            .populate({
+                path: "course",
+                select: "courseName",
+            })
+            .exec();
+        return res.status(200).json({
+            success: true,
+            message: "All reviews fetched successfully",
+            data: allReviews,
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+}
