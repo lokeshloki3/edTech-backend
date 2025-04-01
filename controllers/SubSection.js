@@ -22,7 +22,7 @@ exports.createSubSection = async (req, res) => {
         // create a sub-section
         const subSectionDetails = await SubSection.create({
             title: title,
-            timeDuration: timeDuration,
+            timeDuration: `${uploadDetails.duration}`,
             description: description,
             videoUrl: uploadDetails.secure_url,
         });
@@ -56,11 +56,11 @@ exports.createSubSection = async (req, res) => {
 exports.updateSubSection = async (req, res) => {
     try {
         // fetch data from req body
-        const { title, timeDuration, description, sectionId } = req.body;
+        const { title, timeDuration, description, subSectionId } = req.body;
         // extract file/video
-        const video = req.files.videoFile;
+        // const video = req.files.videoFile;
         // validation
-        const subSection = await SubSection.findById(sectionId);
+        const subSection = await SubSection.findById(subSectionId);
         if (!subSection) {
             return res.status(404).json({
                 success: false,
@@ -78,7 +78,7 @@ exports.updateSubSection = async (req, res) => {
 
         // upload video to Cloudinary - got secure url
         if (req.files && req.files.videoFile !== undefined) {
-            const video = req.files.videoFile
+            const video = req.files.videoFile;
             const uploadDetails = await uploadImageToCloudinary(
                 video,
                 process.env.FOLDER_NAME // folder name on Cloudinary
@@ -109,6 +109,7 @@ exports.deleteSubSection = async (req, res) => {
     try {
         // get ID - assuming we are sending ID in params
         const { subSectionId, sectionId } = req.params;
+        // const { subSectionId, sectionId } = req.body; // testing
         // use findIdAndDelete
         // delete the entry from section schema
         await Section.findByIdAndUpdate(
