@@ -82,6 +82,7 @@ exports.deleteSection = async (req, res) => {
         // use findIdAndDelete
         await Section.findByIdAndDelete(sectionId);
         // Also do - delete the entry from course schema
+        // should all associated SubSection also needs to be deleted ?
         await Course.findByIdAndUpdate(
             { _id: courseId },
             {
