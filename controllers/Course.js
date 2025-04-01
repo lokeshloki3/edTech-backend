@@ -46,7 +46,7 @@ exports.createCourse = async (req, res) => {
         }
 
         // upload Image to Cloudinary - Folder name of cloudinary
-        const thumbnailImage = await uploadImageToCloudinary(thumbnail, process.env.FOLDER_NAME);
+        const thumbnailImage = await uploadImageToCloudinary(thumbnail, process.env.FOLDER_NAME); // folder name on Cloudinary
 
         // create an entry for new Course
         // in course - instructor id is stored so required that so db call above is used

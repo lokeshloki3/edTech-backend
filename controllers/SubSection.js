@@ -18,7 +18,7 @@ exports.createSubSection = async (req, res) => {
             });
         }
         // upload video to Cloudinary - got secure url
-        const uploadDetails = await uploadImageToCloudinary(video, process.env.FOLDER_NAME);
+        const uploadDetails = await uploadImageToCloudinary(video, process.env.FOLDER_NAME); // folder name on Cloudinary
         // create a sub-section
         const subSectionDetails = await SubSection.create({
             title: title,
@@ -68,7 +68,7 @@ exports.updateSubSection = async (req, res) => {
         }
 
         // upload video to Cloudinary - got secure url
-        const uploadDetails = await uploadImageToCloudinary(video, process.env.FOLDER_NAME);
+        const uploadDetails = await uploadImageToCloudinary(video, process.env.FOLDER_NAME); // folder name on Cloudinary
 
         // update data - no need to update section as section only have subsection id
         const section = await SubSection.findByIdAndUpdate(subSectionId,
