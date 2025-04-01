@@ -18,9 +18,7 @@ exports.createCourse = async (req, res) => {
                 message: "All fields are required",
             });
         }
-        if (!status || status === undefined) {
-            status = "Draft";
-        }
+        let courseStatus = status || "Draft";
 
         // check for instructor by getting object id from db(other method) using user id of intsructor is there in req body used in middleware(other method)
         const userId = req.user.id; // user.decode in user in middleware
@@ -54,12 +52,12 @@ exports.createCourse = async (req, res) => {
             courseName,
             courseDescription,
             instructor: instructorDetails._id,
-            whatYouWillLearn,
+            whatYouWillLearn: whatYouWillLearn,
             price,
             tag: tag,
             category: categoryDetails._id, // or req body also have this
             thumbnail: thumbnailImage.secure_url,
-            status: status,
+            status: courseStatus,
             instructions: instructions,
         });
 
@@ -76,7 +74,7 @@ exports.createCourse = async (req, res) => {
 
         // update the Category schema also
         await Category.findByIdAndUpdate(
-            { _id: tagDetails._id },
+            { _id: category },
             {
                 $push: {
                     courses: newCourse._id,
@@ -169,7 +167,7 @@ exports.getCourseDetails = async (req, res) => {
         }
         // return response
         return res.status(200).json({
-            success: false,
+            success: true,
             message: "Course Details fetched successfully",
             data: courseDetails,
         })
