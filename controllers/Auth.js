@@ -117,7 +117,7 @@ exports.signUp = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: "One OTP is not valid",
-            })
+            });
         } else if (otp !== recentOtp[0].otp) {
             // invalid otp
             return res.status(400).json({
