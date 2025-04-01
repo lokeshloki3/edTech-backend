@@ -56,29 +56,39 @@ exports.createSubSection = async (req, res) => {
 exports.updateSubSection = async (req, res) => {
     try {
         // fetch data from req body
-        const { title, timeDuration, description, subSectionId } = req.body;
+        const { title, timeDuration, description, sectionId } = req.body;
         // extract file/video
         const video = req.files.videoFile;
         // validation
-        if (!title || !timeDuration || !description || !video || !subSectionId) {
-            return res.status(400).json({
+        const subSection = await SubSection.findById(sectionId);
+        if (!subSection) {
+            return res.status(404).json({
                 success: false,
-                message: "All fields are required",
-            });
+                message: "SubSection not found",
+            })
+        }
+
+        if (title !== undefined) {
+            subSection.title = title
+        }
+
+        if (description !== undefined) {
+            subSection.description = description
         }
 
         // upload video to Cloudinary - got secure url
-        const uploadDetails = await uploadImageToCloudinary(video, process.env.FOLDER_NAME); // folder name on Cloudinary
-
+        if (req.files && req.files.videoFile !== undefined) {
+            const video = req.files.videoFile
+            const uploadDetails = await uploadImageToCloudinary(
+                video,
+                process.env.FOLDER_NAME // folder name on Cloudinary
+            )
+            subSection.videoUrl = uploadDetails.secure_url
+            subSection.timeDuration = `${uploadDetails.duration}`
+        }
         // update data - no need to update section as section only have subsection id
-        const section = await SubSection.findByIdAndUpdate(subSectionId,
-            {
-                title: title,
-                timeDuration: timeDuration,
-                description: description,
-                videoUrl: uploadDetails.secure_url,
-            }, { new: true });
-        // delete the entry from section schema ?
+        await subSection.save()
+
         // return response
         return res.status(200).json({
             success: true,
@@ -98,11 +108,26 @@ exports.updateSubSection = async (req, res) => {
 exports.deleteSubSection = async (req, res) => {
     try {
         // get ID - assuming we are sending ID in params
-        const { subSectionId } = req.params;
+        const { subSectionId, sectionId } = req.params;
         // use findIdAndDelete
-        await SubSection.findByIdAndDelete({ subSectionId });
+        // delete the entry from section schema
+        await Section.findByIdAndUpdate(
+            { _id: sectionId },
+            {
+                $pull: {
+                    subSection: subSectionId,
+                },
+            }
+        )
+        const subSection = await SubSection.findByIdAndDelete({ _id: subSectionId });
 
-        // delete the entry from section schema ?
+        if (!subSection) {
+            return res.status(404).json({
+                success: false,
+                message: "SubSection not found"
+            });
+        }
+
         // return response
         return res.status(200).json({
             success: true,
