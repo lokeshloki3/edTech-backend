@@ -113,16 +113,16 @@ exports.signUp = async (req, res) => {
 
         // validate OTP
         if (recentOtp.length == 0) {
-            // otp not found
+            // otp not found for the email
             return res.status(400).json({
                 success: false,
-                message: "OTP not found"
+                message: "One OTP is not valid"
             })
         } else if (otp !== recentOtp[0].otp) {
             // invalid otp
             return res.status(400).json({
                 success: false,
-                message: "OTP not matching",
+                message: "Most Recent OTP is not matching",
             });
         }
 
