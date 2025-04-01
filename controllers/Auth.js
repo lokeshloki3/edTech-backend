@@ -116,7 +116,7 @@ exports.signUp = async (req, res) => {
             // otp not found for the email
             return res.status(400).json({
                 success: false,
-                message: "One OTP is not valid"
+                message: "One OTP is not valid",
             })
         } else if (otp !== recentOtp[0].otp) {
             // invalid otp
