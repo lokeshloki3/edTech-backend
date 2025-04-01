@@ -41,7 +41,7 @@ exports.updateProfile = async (req, res) => {
     }
 }
 
-// deleteAccount
+// deleteAccount for student (not Admin)
 // Explore -> How can we schedule this deletion operation say after 5 days - cron jobs
 exports.deleteAccount = async (req, res) => {
     try {
@@ -52,7 +52,8 @@ exports.deleteAccount = async (req, res) => {
         // console.log(job);
 
         // get id - middleware decode
-        const id = req.body.id;
+        const id = req.user.id;
+        console.log("Printing id", id);
         // validation
         const userDetails = await User.findById(id);
         if (!userDetails) {
@@ -62,7 +63,7 @@ exports.deleteAccount = async (req, res) => {
             });
         }
         // delete profile
-        await Profile.findByIdAndDelete({ _id: userDetails.additonalDetails });
+        await Profile.findByIdAndDelete({ _id: userDetails.additionalDetails });
         // also do - unenroll user student from all the enrolled courses - not teacher as course will remain even after teacher leaves
         // delete user
         await User.findByIdAndDelete({ _id: id });
