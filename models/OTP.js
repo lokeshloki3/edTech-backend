@@ -50,7 +50,7 @@ OTPSchema.pre("save", async function (next) {
     next(); // Move to next middleware
 })
 
-mongoose.exports = mongoose.model("OTP", OTPSchema);
+module.exports = mongoose.model("OTP", OTPSchema);
 
 // const OTP = mongoose.model("OTP", OTPSchema);
 

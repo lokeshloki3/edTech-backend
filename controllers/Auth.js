@@ -67,7 +67,7 @@ exports.sendOTP = async (req, res) => {
 }
 
 // signUp
-exports.singUp = async (req, res) => {
+exports.signUp = async (req, res) => {
 
     try {
         // Destructure fields from req body

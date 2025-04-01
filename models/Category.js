@@ -18,4 +18,4 @@ const categorySchema = new mongoose.Schema({
 });
 
 // Exports the Tags-Category schema
-mongoose.exports = mongoose.model("Category", categorySchema);
+module.exports = mongoose.model("Category", categorySchema);
