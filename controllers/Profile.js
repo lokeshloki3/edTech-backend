@@ -1,12 +1,13 @@
 const Profile = require("../models/Profile");
 const User = require("../models/User");
+const { uploadImageToCloudinary } = require("../utils/imageUploader");
 
 exports.updateProfile = async (req, res) => {
     try {
         // get data
         const { dateOfBirth = "", about = "", contactNumber, gender } = req.body;
         // get userId - attached by decode in middleware to req
-        const id = req.body.id;
+        const id = req.user.id; // id authentication middleware sets req.user
         // validation
         if (!contactNumber || !gender || !id) {
             return res.status(400).json({
@@ -16,7 +17,7 @@ exports.updateProfile = async (req, res) => {
         }
         // find profile
         const userDetails = await User.findById(id);
-        const profileId = userDetails.additonalDetails;
+        const profileId = userDetails.additionalDetails;
         const profileDetails = await Profile.findById(profileId);
 
         // update profile - used save here instead of create as Profile data is already there with null values
